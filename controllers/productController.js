@@ -52,3 +52,27 @@ exports.updateProduct = async (req, res, next) => {
   });
 };
 
+//delete product
+
+exports.deleteProduct = async(req, res, next)=>{
+  console.log(req.body);
+  const result = await Product.findOneAndDelete(req.body.findQuery);
+  console.log(result, "result");
+  if(!result) return res.status(500).json({success: false, message: "Not found"})
+ 
+  res.status(200).json({
+    success: true,
+    result
+  })
+};
+
+//get single product
+
+exports.getSingleProduct = async(req, res, next)=>{
+  let result = await Product.findOne({_id: req.params.id})
+  console.log(result, "result");
+  res.status(200).json({
+    success: true,
+    result
+  })
+}
