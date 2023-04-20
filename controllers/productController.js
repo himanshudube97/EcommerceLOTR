@@ -36,58 +36,19 @@ exports.getAllProducts = async (req, res) => {
 
 exports.updateProduct = async (req, res, next) => {
   let result = await Product.findOneAndUpdate(
-    { _id: req.body.productId },
+    req.body.findQuery,
     req.body.updateQuery,
-    { upsert: false, new: true, runValidators: true, useFindAndModify: false }
+    { upsert: false, new: true, runValidators: true }
   );
 
   if (!result) {
-    res.status(500).json({
-        success: false
-    })
-  } else {
-    res.status(200).json({
-      success: true,
-      result: result,
+    return res.status(500).json({
+      success: false,
     });
   }
+  res.status(200).json({
+    success: true,
+    result: result,
+  });
 };
 
-//Delete Product
-exports.deleteProduct = async (req, res, next) => {
-    if(!mongoose.Types.ObjectId.isValid(req.body.productId)){
-        return res.status(400).json({
-            message: "Invalid Object Id"
-        })
-    }
-  let result = await Product.deleteOne({ _id: req.body.productId });
-  console.log(result, "result")
-  if (result.deletedCount === 0) {
-    res.status(500).json({
-        success: false
-    })
-  } else {
-    res.status(200).json({
-      success: true,
-      message: "Product deleted successfully",
-      result: result,
-    });
-  }
-};
-
-//Get single Product
-
-exports.getProductById = async (req, res, next) => {
-  let result = await Product.findOne({ _id: req.params.id });
-  console.log(result, "result");
-  if (!result) {
-    res.status(500).json({
-        success: false
-    })
-  } else {
-    res.status(200).json({
-      success: true,
-      result: result,
-    });
-  }
-};
