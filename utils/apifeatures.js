@@ -33,16 +33,24 @@ class ApiFeatures {
 
     //Filter for Price and Rating
 
-    let queryStr = JSON.stringify(queryStrCopy);
-    console.log(queryStr, 'querystr')
-    queryStr = queryStr.replace(/\b(gt|gte|lt|lte)\b/g, (key)=> `$${key}`);  //regex isliye use kiya if ese expression hoga tabhi modify hoga.
-    console.log(queryStr, 'modiquerystr')
+    let queryNew = JSON.stringify(queryStrCopy);
+    console.log(queryNew, 'querystr')
+    queryNew = queryNew.replace(/\b(gt|gte|lt|lte)\b/g, (key)=> `$${key}`);  //regex isliye use kiya if ese expression hoga tabhi modify hoga.
+    console.log(queryNew, 'modiquerystr')
 
-    console.log(JSON.parse(queryStr), 'parsedquerystr');
+    console.log(JSON.parse(queryNew), 'parsedquerystr');
 
 
-    this.query = this.query.find(JSON.parse(queryStr));
+    this.query = this.query.find(JSON.parse(queryNew));
     return this;
+  }
+  pagination(resultPerPage){
+   const currentPage = Number(this.queryStr.page) || 1
+   const skip = resultPerPage * (currentPage - 1);
+   console.log(skip, "skip");
+   this.query = this.query.skip(skip).limit(resultPerPage)
+  // this.query = this.query.limit(resultPerPage).skip(skip);
+   return this;
   }
 }
 
