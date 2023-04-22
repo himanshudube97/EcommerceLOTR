@@ -26,7 +26,6 @@ exports.getAllProducts = catchAsyncErrors(async (req, res, next) => {
     success: true,
     productCount,
     result: result,
-    
   });
 });
 
@@ -74,6 +73,34 @@ exports.getSingleProduct = catchAsyncErrors(async (req, res, next) => {
     success: true,
     result,
   });
+});
+
+// Create New review or Update the review
+
+exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
+  console.log(req.user)
+  const { rating, comment, productId } = req.body;
+  const review = {
+    user: req.user._id,
+    name: req.user.name,
+    rating: Number(rating),
+    comment,
+  };
+  
+
+  const product = await Product.findById(productId);
+console.log(product, "product")
+  const isReviewed = product.reviews.find((rev)=>
+    rev.user.toString() === rev.user._id.toString()
+  )
+  console.log(isReviewed, "isReviewed");
+  
+
+  // const product = await Product.findOneAndUpdate(
+  //   { _id: productId,  },
+  //   {$push: {reviews: review}},
+  //   {upsert: true}
+  //   );
 });
 
 // async error hoga jab create product ke time pe agar hum required field na dein.
