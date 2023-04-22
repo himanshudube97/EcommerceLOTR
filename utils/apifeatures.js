@@ -60,3 +60,5 @@ module.exports = ApiFeatures;
 
 
 // is code main searc() ke baad filter() chal rha hai, means ki agar search() empty hai to all products aayega and whai filter hoga, else jo search hoga phle usse hi aaghe fitler hoga data.
+
+//category kabhi empty nahi hogi, matlab front se aayega hi kuch ya dekh lenge, empty category wala koi document nahi hoga.
