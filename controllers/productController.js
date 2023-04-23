@@ -2,6 +2,7 @@ const Product = require("../models/productModel");
 const Errorhandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apifeatures");
+const mongoose = require("mongoose");
 //Create Product -- Admin route
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   req.body.user = req.user.id;
@@ -78,7 +79,7 @@ exports.getSingleProduct = catchAsyncErrors(async (req, res, next) => {
 // Create New review or Update the review
 
 exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
-  console.log(req.user)
+  console.log(req.user);
   const { rating, comment, productId } = req.body;
   const review = {
     user: req.user._id,
@@ -86,21 +87,91 @@ exports.createProductReview = catchAsyncErrors(async (req, res, next) => {
     rating: Number(rating),
     comment,
   };
-  
 
   const product = await Product.findById(productId);
-console.log(product, "product")
-  const isReviewed = product.reviews.find((rev)=>
-    rev.user.toString() === rev.user._id.toString()
-  )
-  console.log(isReviewed, "isReviewed");
-  
 
-  // const product = await Product.findOneAndUpdate(
-  //   { _id: productId,  },
-  //   {$push: {reviews: review}},
-  //   {upsert: true}
-  //   );
+  const isReviewed = product.reviews.find(
+    (rev) => rev.user.toString() === req.user._id.toString()
+  );
+  console.log(isReviewed, "isReviewed");
+
+  if (isReviewed) {
+    product.reviews.forEach((rev) => {
+      if (rev.user.toString() === req.user._id.toString()) {
+        rev.rating = rating;
+        rev.comment = comment;
+      }
+    });
+  } else {
+    product.reviews.push(review);
+    product.numOfReviews = product.reviews.length;
+  }
+
+  let avg = 0;
+
+  product.reviews.forEach((rev) => {
+    avg = avg + rev.rating;
+  });
+
+  product.ratings = avg / product.reviews.length;
+  await product.save({ validateBeforeSave: false });
+  res.status(200).json({
+    success: true,
+    message: "review updated",
+  });
+});
+
+// Get All Reviews of a Product
+
+exports.getAllReviews = catchAsyncErrors(async (req, res, next) => {
+  let product = await Product.findById(req.query.productId);
+
+  if (!product) {
+    return next(new Errorhandler("Product doesn't exists", 400));
+  }
+
+  res.status(200).json({
+    success: true,
+    reviews: product.reviews,
+  });
+});
+
+//Delete Review-
+
+exports.deleteReview = catchAsyncErrors(async (req, res, next) => {
+  let product = await Product.findOne({ _id: req.query.productId });
+
+  if (!product) {
+    return next(new Errorhandler("Product doesn't exists", 400));
+  }
+
+  const reviews = product.reviews.filter((item) => {
+    return item._id.toString() !== req.query.reviewId;
+  });
+
+  let avg = 0;
+
+  reviews.forEach((rev) => {
+    avg = avg + rev.rating;
+  });
+
+  const ratings = avg / reviews.length;
+
+  const numOfReviews = reviews.length;
+
+  await Product.findByIdAndUpdate(
+    req.query.productId,
+    {
+      reviews,
+      ratings,
+      numOfReviews,
+    },
+    { new: true, runValidators: true }
+  );
+
+  res.status(200).json({
+    success: true,
+  });
 });
 
 // async error hoga jab create product ke time pe agar hum required field na dein.
