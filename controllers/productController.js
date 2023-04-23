@@ -2,7 +2,7 @@ const Product = require("../models/productModel");
 const Errorhandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 const ApiFeatures = require("../utils/apifeatures");
-const mongoose = require("mongoose");
+
 //Create Product -- Admin route
 exports.createProduct = catchAsyncErrors(async (req, res, next) => {
   req.body.user = req.user.id;
